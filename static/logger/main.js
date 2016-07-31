@@ -6,7 +6,7 @@
     socket.on('connect', function () {
         socket.emit('search',);
     });
-    socket.on('newTrack', function () {
+    socket.on('newTrack', function (time, title, artist, group, requester) {
 
     });
 
@@ -15,21 +15,26 @@
     });
 
     socket.on('removeTrack', function (id) {
-        $(id).remove();
+        $(".row#" + id).remove();
     });
 
-    socket.on('nextPage', function () {
+    /* next page */
+    function nextRange() {
+        socket.send();
+        $(".row[id!=header]").remove();
+    }
 
-    });
-
-    socket.send("search")
-
-    function addTrack()
-
-    ()
-    {
+    function search() {
 
     }
-    ;
+
+    function addTrack(id, time, artist, title) {
+        $("div#header").insertAfter("<div id='" + id + "' class='row'><div class='column'>" + time +
+            "</div><div class='column'>" + artist + "</div><div class='column'>" + title + "</div></div>");
+    }
+
+    function updateTrack(id, time, artist, title) {
+        $("div#id");
+    }
 
 })(jQuery);

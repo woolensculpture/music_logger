@@ -12,7 +12,6 @@ socketio = SocketIO(app)
 
 
 @app.route('/')
-@app.route('/details')
 def Page():
     return render_template("index.html")
 
@@ -47,11 +46,12 @@ def updateTrack(track):
 def removeTrack(trackId):
     track = Track.query.get(trackId)
     db.session.delete(track)
+    db.session.commit()
     emit('removeTrack', trackId, broadcast=True)
 
 
-@socketio.on('search')
-def searchTrack(start=None, end=None, title=None, artist=None):
+@socketio.on('query')
+def searchTrack(start=None, end=None, title=None, artist=None, rangeStart=0, rangeEnd=20):
     results = Track.query
     if start is not None:
         results = results.filter_by(Track.time >= start)
@@ -67,3 +67,17 @@ def searchTrack(start=None, end=None, title=None, artist=None):
 if __name__ == '__main__':
     socketio.run(app)
     app.run()
+
+
+# watch over the database and push updates when rvdl or another source updates and it does not go through the server.
+# note: this might not be a good idea if the application ever has to scale since constantly checking for updates to rows
+# is taxing on databases, especially mysql. If performance is bad you will have to have this server listen to rvdl's
+# command output over udp instead of querying the database directly for changes. This will increase performance in all
+# accept a few edge cases. However whatever you do, DO NOT OPEN UP A TRANSACTION FOR EVERY REQUEST. This leads to
+# a security and memory leak issue this application was designed to fix compared to the php version.
+def dbOverwatch():
+    # TODO: have threaded function that connects to database
+    # query: SELECT * FROM Tracks JOIN Groups ON Tracks.group_id=Groups.id WHERE Tracks.Created_at >= time OR Tracks.Updated_at >= time;
+    # repeat this query every few seconds or every minute depending if seconds are stored. If not will have to keep a local copy cached to
+    # make sure duplicates are not sent.
+    return

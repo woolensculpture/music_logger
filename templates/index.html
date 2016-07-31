@@ -15,15 +15,19 @@
     <link rel="foundation-js" {{ url_for('static', filename='foundation/js/vendor/what-input.js') }}>
 </head>
 <body>
-<div class="row"><h1>WITR 89.7 (Near) Endless Song Logger</h1></div>
+<div id="header" class="row"><h1>WITR 89.7 (Near) Endless Song Logger</h1></div>
 <div class="row">
     <div class="column"><h5>Time Played</h5></div>
     <div class="column"><h5>Artist</h5></div>
     <div class="column"><h5>Title</h5></div>
     <div class="column"><h5>Played</h5></div>
+
+    {% if detailed== true %}
+        <div class="column"><h5>rvdl</h5></div>
+        <div class="column"><h5>group</h5></div>
     <div class="column"><h5>Request</h5></div>
     <div class="column"><h5>Requester</h5></div>
-
+    {% endif %}
 </div>
 <div class="row">
     <!-- pagination -->
