@@ -36,6 +36,8 @@ CREATE TABLE `tracks` (
   `queue_job_id` INT(16)                  DEFAULT NULL,
   PRIMARY KEY (`id`)
 )
+  -- Maybe look into switching the engine to InnoDB to allow for row level locks rather
+  -- Table level locks
   ENGINE = MyISAM
   AUTO_INCREMENT = 510092
   DEFAULT CHARSET = utf8

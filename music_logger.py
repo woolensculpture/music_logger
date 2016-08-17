@@ -1,10 +1,13 @@
+import json
+import threading
+from datetime import datetime
 from json import dumps, loads
+from time import sleep
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
 from track import Track, db
-
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = "secret?"
@@ -29,7 +32,7 @@ def addTrack(track):
                     aTrack['time'], aTrack['request'], aTrack['requester'])
     db.session.add(dbTrack)
     db.session.commit()
-    emit('addTrack', track, json=True, broadcast=True)
+    emit('addTracks', track, json=True, broadcast=True)
 
 
 @socketio.on('updateTrack')
@@ -61,12 +64,7 @@ def searchTrack(start=None, end=None, title=None, artist=None, rangeStart=0, ran
         results = results.filter(Track.artist.like(artist))
     if title is not None:
         results = results.filter(Track.title.like(artist))
-    emit('results', dumps(results.limit(20).all()), json=True)
-
-
-if __name__ == '__main__':
-    socketio.run(app)
-    app.run()
+    emit('results', dumps(results.limit().all()), json=True)
 
 
 # watch over the database and push updates when rvdl or another source updates and it does not go through the server.
@@ -77,7 +75,21 @@ if __name__ == '__main__':
 # a security and memory leak issue this application was designed to fix compared to the php version.
 def dbOverwatch():
     # TODO: have threaded function that connects to database
-    # query: SELECT * FROM Tracks JOIN Groups ON Tracks.group_id=Groups.id WHERE Tracks.Created_at >= time OR Tracks.Updated_at >= time;
-    # repeat this query every few seconds or every minute depending if seconds are stored. If not will have to keep a local copy cached to
-    # make sure duplicates are not sent.
-    return
+    # query: SELECT * FROM Tracks JOIN Groups ON Tracks.group_id=Groups.id WHERE Tracks.created_at >= time;
+    # repeat this query every few seconds, .
+    # If not will have to keep a local copy cached to make sure duplicates are not sent.
+    time = datetime.now()
+    oldTracks = newTracks = Track.query(Track.created_at >= time).all()
+    while True:
+        newTracks = Track.query(Track.created_at >= time).all()  # get all newly created tracks since last check
+        newTracks = [track for track in newTracks if track not in oldTracks]  # filter out already emitted tracks
+        emit("addTracks", json.dumps(newTracks))
+        oldTracks = newTracks + [track for track in oldTracks if track.created_at >= time]
+        sleep(3)
+    return dbOverwatch()
+
+
+if __name__ == '__main__':
+    socketio.run(app)
+    app.run()
+    threading.Thread(dbOverwatch())

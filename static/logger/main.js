@@ -4,27 +4,27 @@
 (function display($) {
     var socket = io.connect('http://' + document.domain + ':' + location.port);
     socket.on('connect', function () {
-        socket.emit('search',);
+        socket.emit('search', p);
     });
-    socket.on('newTrack', function (time, title, artist, group, requester) {
-
+    socket.on('addTracks', function (Tracks) {
+        add
     });
 
-    socket.on('updateTrack', function () {
-
+    socket.on('updateTrack', function (id, time, title, artist, group, rivendell, requester) {
+        $("#" + id.toString());
     });
 
     socket.on('removeTrack', function (id) {
-        $(".row#" + id).remove();
+        $("#" + id.toString()).fadeOut().remove();
     });
 
-    /* next page */
+    /* pagination: store date range client side and query */
     function nextRange() {
         socket.send();
         $(".row[id!=header]").remove();
     }
 
-    function search() {
+    function search(id, time, title, artist, group, rivendell, requester) {
 
     }
 
@@ -33,8 +33,5 @@
             "</div><div class='column'>" + artist + "</div><div class='column'>" + title + "</div></div>");
     }
 
-    function updateTrack(id, time, artist, title) {
-        $("div#id");
-    }
 
 })(jQuery);
