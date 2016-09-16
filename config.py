@@ -1,5 +1,7 @@
 """configs of the music logger, to change which config is loaded(Production, Staging, Development) go to music_logger.py
  and change the class in the app.config.from_object()"""
+
+
 class Config(object):
     DEBUG = False
     TESTING = False
@@ -16,6 +18,7 @@ class Production(Config):
     DB_PASSWORD = ''
     DB_HOST = ''
     DB_NAME = ''
+
 
 class Staging(Config):
     DB_USER = ''
