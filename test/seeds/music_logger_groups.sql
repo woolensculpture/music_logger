@@ -27,7 +27,7 @@ CREATE TABLE `groups` (
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
 )
-  ENGINE = MyISAM
+  ENGINE = InnoDB
   AUTO_INCREMENT = 6
   DEFAULT CHARSET = utf8
   COLLATE = utf8_unicode_ci;

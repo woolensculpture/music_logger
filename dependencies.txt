@@ -4,7 +4,8 @@ Flask               0.10.1
 Flask-SQLAlchemy	2.1
 Flask-SocketIO		2.3
 pytz	            2016.4
+PyMySQL (for windows development)
 
 client-side:
 Foundation 6
-
+jQuery

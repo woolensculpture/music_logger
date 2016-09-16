@@ -7,7 +7,7 @@
         socket.emit('search', p);
     });
     socket.on('addTracks', function (Tracks) {
-        add
+        Tracks.forEach(addTrack);
     });
 
     socket.on('updateTrack', function (id, time, title, artist, group, rivendell, requester) {
@@ -33,5 +33,5 @@
             "</div><div class='column'>" + artist + "</div><div class='column'>" + title + "</div></div>");
     }
 
-
+    b
 })(jQuery);

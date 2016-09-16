@@ -8,6 +8,7 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
 from track import Track, db
+
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = "secret?"
@@ -19,10 +20,14 @@ def Page():
     return render_template("index.html")
 
 
+@app.route('/Details')
+def Details():
+    return render_template("index.html", detailed=True)
+
 @socketio.on('connect')
 def startup():
     tracks = Track.query.order_by(Track.time).limit(20).all()
-    emit('addTrack', loads(tracks), json=True)
+    emit('addTrack', tracks_to_json(tracks), json=True)
 
 
 @socketio.on('addTrack')
@@ -83,10 +88,25 @@ def dbOverwatch():
     while True:
         newTracks = Track.query(Track.created_at >= time).all()  # get all newly created tracks since last check
         newTracks = [track for track in newTracks if track not in oldTracks]  # filter out already emitted tracks
-        emit("addTracks", json.dumps(newTracks))
+        emit("addTracks", tracks_to_json(newTracks))
         oldTracks = newTracks + [track for track in oldTracks if track.created_at >= time]
         sleep(3)
     return dbOverwatch()
+
+
+def tracks_to_json(query):
+    """function for converting  prettifying the json while debugging, switch to compact for deployment"""
+    obj = []
+    if isinstance(query, list):
+        for track in query:
+            pass  # TODO
+    else:
+        obj.append({'id': query.id, 'artist': query.artist, 'title': query.title, 'time': query.time,
+                    'request': query.request, 'requester': query.requester})
+    if app.debug:
+        return json.dumps(obj, sort_keys=True, indent=4)
+    else:
+        return json.dumps(obj, separators=(',', ':'))
 
 
 if __name__ == '__main__':
