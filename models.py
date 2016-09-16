@@ -3,10 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
-# in production get rid of pymysql in the url, though a decent driver and written entirely in python there are better
-# alternatives, this is only temporary for windows based development
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://music_logger@localhost/music_logger'
-
 
 class Group(db.Model):
     __tablename__ = 'groups'

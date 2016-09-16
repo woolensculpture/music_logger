@@ -7,11 +7,12 @@ from time import sleep
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
-from track import Track, db
+from config import Production, Staging, Development
+from models import Track, db
 
 app = Flask(__name__)
-
-app.config['SECRET_KEY'] = "secret?"
+app.config.from_object('music_logger.default_settings')
+app.config.from_object(Development)  # change loaded config name to change attributes
 socketio = SocketIO(app)
 
 
@@ -69,7 +70,7 @@ def searchTrack(start=None, end=None, title=None, artist=None, rangeStart=0, ran
         results = results.filter(Track.artist.like(artist))
     if title is not None:
         results = results.filter(Track.title.like(artist))
-    emit('results', dumps(results.limit().all()), json=True)
+    emit('results', tracks_to_json(results.limit().all()), json=True)
 
 
 # watch over the database and push updates when rvdl or another source updates and it does not go through the server.
@@ -79,12 +80,12 @@ def searchTrack(start=None, end=None, title=None, artist=None, rangeStart=0, ran
 # accept a few edge cases. However whatever you do, DO NOT OPEN UP A TRANSACTION FOR EVERY REQUEST. This leads to
 # a security and memory leak issue this application was designed to fix compared to the php version.
 def dbOverwatch():
-    # TODO: have threaded function that connects to database
+    # TODO: have threaded function that connects to database, make updated tracks
     # query: SELECT * FROM Tracks JOIN Groups ON Tracks.group_id=Groups.id WHERE Tracks.created_at >= time;
     # repeat this query every few seconds, .
     # If not will have to keep a local copy cached to make sure duplicates are not sent.
     time = datetime.now()
-    oldTracks = newTracks = Track.query(Track.created_at >= time).all()
+    oldTracks = Track.query(Track.created_at >= time).all()
     while True:
         newTracks = Track.query(Track.created_at >= time).all()  # get all newly created tracks since last check
         newTracks = [track for track in newTracks if track not in oldTracks]  # filter out already emitted tracks
@@ -95,18 +96,20 @@ def dbOverwatch():
 
 
 def tracks_to_json(query):
-    """function for converting  prettifying the json while debugging, switch to compact for deployment"""
+    """function for converting tracks to json and prettifying the
+    json while debugging, switch to compact for deployment"""
     obj = []
     if isinstance(query, list):
         for track in query:
-            pass  # TODO
+            obj.append({'id': track.id, 'artist': track.artist, 'title': track.title, 'time': track.time,
+                        'request': track.request, 'requester': track.requester})
     else:
         obj.append({'id': query.id, 'artist': query.artist, 'title': query.title, 'time': query.time,
                     'request': query.request, 'requester': query.requester})
-    if app.debug:
-        return json.dumps(obj, sort_keys=True, indent=4)
+    if app.testing:
+        return dumps(obj, sort_keys=True, indent=4)
     else:
-        return json.dumps(obj, separators=(',', ':'))
+        return dumps(obj, separators=(',', ':'))
 
 
 if __name__ == '__main__':
