@@ -156,7 +156,7 @@ window.whatInput = (function () {
             } else {
                 switchInput(value);
             }
-        }
+    }
 
         if (value === 'keyboard') logKeys(eventKey);
     }
@@ -181,7 +181,7 @@ window.whatInput = (function () {
             return pointerMap[event.pointerType];
         } else {
             return (event.pointerType === 'pen') ? 'touch' : event.pointerType; // treat pen like touch
-        }
+    }
     }
 
     // keyboard logging
@@ -216,7 +216,7 @@ window.whatInput = (function () {
             if ('ontouchstart' in window) {
                 body.addEventListener('touchstart', eventBuffer);
             }
-        }
+    }
 
         // mouse wheel
         body.addEventListener(mouseWheel, bufferedEvent);
@@ -267,7 +267,7 @@ window.whatInput = (function () {
             // otherwise wait for the dom to load (script was placed in the <head>)
         } else {
             document.addEventListener('DOMContentLoaded', bindEvents);
-        }
+    }
     }
 
 

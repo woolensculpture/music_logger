@@ -1,4 +1,3 @@
-import json
 import threading
 from datetime import datetime
 from json import dumps, loads
@@ -7,60 +6,68 @@ from time import sleep
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
-from config import Production, Staging, Development
+from config import Development
 from models import Track, db
 
 app = Flask(__name__)
-app.config.from_object('music_logger.default_settings')
 app.config.from_object(Development)  # change loaded config name to change attributes
+db.init_app(app)
 socketio = SocketIO(app)
 
 
 @app.route('/')
-def Page():
+def page():
     return render_template("index.html")
 
 
+# for legacy programs
+@app.route('/latest.json')
+def latest():
+    return tracks_to_json(Track.query.order_by(Track.created_at).first())
+
+
 @app.route('/Details')
-def Details():
+def details():
     return render_template("index.html", detailed=True)
+
 
 @socketio.on('connect')
 def startup():
-    tracks = Track.query.order_by(Track.time).limit(20).all()
-    emit('addTrack', tracks_to_json(tracks), json=True)
+    tracks = Track.query.order_by(Track.created_at).limit(20).all()
+    print("got signal")
+    emit('connected', tracks_to_json(tracks), json=True)
 
 
 @socketio.on('addTrack')
-def addTrack(track):
-    aTrack = loads(track)
-    dbTrack = Track(aTrack['artist'], aTrack['title'], aTrack['group'],
-                    aTrack['time'], aTrack['request'], aTrack['requester'])
-    db.session.add(dbTrack)
+def add_track(track):
+    a_track = loads(track)
+    db_track = Track(a_track['artist'], a_track['title'], a_track['group'],
+                     a_track['time'], a_track['request'], a_track['requester'])
+    db.session.add(db_track)
     db.session.commit()
     emit('addTracks', track, json=True, broadcast=True)
 
 
 @socketio.on('updateTrack')
-def updateTrack(track):
-    dictTrack = loads(track)
-    trackToUpdate = Track.query.get(dictTrack['id'])
-    for column in dictTrack:
-        setattr(trackToUpdate, column, dictTrack[column])
+def update_track(track):
+    dict_track = loads(track)
+    track_to_update = Track.query.get(dict_track['id'])
+    for column in dict_track:
+        setattr(track_to_update, column, dict_track[column])
     db.session.commit()
     emit('updateTrack', track, json=True, broadcast=True)
 
 
 @socketio.on('removeTrack')
-def removeTrack(trackId):
-    track = Track.query.get(trackId)
+def remove_track(track_id):
+    track = Track.query.get(track_id)
     db.session.delete(track)
     db.session.commit()
-    emit('removeTrack', trackId, broadcast=True)
+    emit('removeTrack', track_id, broadcast=True)
 
 
 @socketio.on('query')
-def searchTrack(start=None, end=None, title=None, artist=None, rangeStart=0, rangeEnd=20):
+def search_track(start=None, end=None, title=None, artist=None):
     results = Track.query
     if start is not None:
         results = results.filter_by(Track.time >= start)
@@ -79,20 +86,20 @@ def searchTrack(start=None, end=None, title=None, artist=None, rangeStart=0, ran
 # command output over udp instead of querying the database directly for changes. This will increase performance in all
 # accept a few edge cases. However whatever you do, DO NOT OPEN UP A TRANSACTION FOR EVERY REQUEST. This leads to
 # a security and memory leak issue this application was designed to fix compared to the php version.
-def dbOverwatch():
+def db_overwatch():
     # TODO: have threaded function that connects to database, make updated tracks
     # query: SELECT * FROM Tracks JOIN Groups ON Tracks.group_id=Groups.id WHERE Tracks.created_at >= time;
     # repeat this query every few seconds, .
     # If not will have to keep a local copy cached to make sure duplicates are not sent.
     time = datetime.now()
-    oldTracks = Track.query(Track.created_at >= time).all()
+    old_tracks = Track.query(Track.created_at >= time).all()
     while True:
-        newTracks = Track.query(Track.created_at >= time).all()  # get all newly created tracks since last check
-        newTracks = [track for track in newTracks if track not in oldTracks]  # filter out already emitted tracks
-        emit("addTracks", tracks_to_json(newTracks))
-        oldTracks = newTracks + [track for track in oldTracks if track.created_at >= time]
+        new_tracks = Track.query(Track.created_at >= time).all()  # get all newly created tracks since last check
+        new_tracks = [track for track in new_tracks if track not in old_tracks]  # filter out already emitted tracks
+        emit("addTracks", tracks_to_json(new_tracks))
+        old_tracks = new_tracks + [track for track in old_tracks if track.created_at >= time]
         sleep(3)
-    return dbOverwatch()
+    return db_overwatch()
 
 
 def tracks_to_json(query):
@@ -101,11 +108,13 @@ def tracks_to_json(query):
     obj = []
     if isinstance(query, list):
         for track in query:
-            obj.append({'id': track.id, 'artist': track.artist, 'title': track.title, 'time': track.time,
-                        'request': track.request, 'requester': track.requester})
+            obj.append({'id': track.id, 'artist': track.artist, 'title': track.title,
+                        'time': track.created_at.strftime("%x %I:%M %p"), 'requester': track.requester,
+                        'group': track.group.name})
     else:
-        obj.append({'id': query.id, 'artist': query.artist, 'title': query.title, 'time': query.time,
-                    'request': query.request, 'requester': query.requester})
+        obj.append({'id': query.id, 'artist': query.artist, 'title': query.title,
+                    'time': query.created_at.strftime("%x %I:%M %p"), 'requester': query.requester,
+                    'group': query.group.name})
     if app.testing:
         return dumps(obj, sort_keys=True, indent=4)
     else:
@@ -113,6 +122,6 @@ def tracks_to_json(query):
 
 
 if __name__ == '__main__':
-    socketio.run(app)
     app.run()
-    threading.Thread(dbOverwatch())
+    socketio.run(app)
+    threading.Thread(db_overwatch())

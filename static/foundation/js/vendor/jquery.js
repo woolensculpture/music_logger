@@ -66,7 +66,7 @@
     var
         version = "2.2.2",
 
-    // Define a local copy of jQuery
+        // Define a local copy of jQuery
         jQuery = function (selector, context) {
 
             // The jQuery object is actually just the init constructor 'enhanced'
@@ -74,15 +74,15 @@
             return new jQuery.fn.init(selector, context);
         },
 
-    // Support: Android<4.1
-    // Make sure we trim BOM and NBSP
+        // Support: Android<4.1
+        // Make sure we trim BOM and NBSP
         rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,
 
-    // Matches dashed string for camelizing
+        // Matches dashed string for camelizing
         rmsPrefix = /^-ms-/,
         rdashAlpha = /-([\da-z])/gi,
 
-    // Used by jQuery.camelCase as callback to replace()
+        // Used by jQuery.camelCase as callback to replace()
         fcamelCase = function (all, letter) {
             return letter.toUpperCase();
         };
@@ -567,7 +567,7 @@
                 sortInput,
                 hasDuplicate,
 
-            // Local document vars
+                // Local document vars
                 setDocument,
                 document,
                 docElem,
@@ -577,7 +577,7 @@
                 matches,
                 contains,
 
-            // Instance-specific data
+                // Instance-specific data
                 expando = "sizzle" + 1 * new Date(),
                 preferredDoc = window.document,
                 dirruns = 0,
@@ -592,18 +592,18 @@
                     return 0;
                 },
 
-            // General-purpose constants
+                // General-purpose constants
                 MAX_NEGATIVE = 1 << 31,
 
-            // Instance methods
+                // Instance methods
                 hasOwn = ({}).hasOwnProperty,
                 arr = [],
                 pop = arr.pop,
                 push_native = arr.push,
                 push = arr.push,
                 slice = arr.slice,
-            // Use a stripped-down indexOf as it's faster than native
-            // http://jsperf.com/thor-indexof-vs-for/5
+                // Use a stripped-down indexOf as it's faster than native
+                // http://jsperf.com/thor-indexof-vs-for/5
                 indexOf = function (list, elem) {
                     var i = 0,
                         len = list.length;
@@ -617,15 +617,15 @@
 
                 booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",
 
-            // Regular expressions
+                // Regular expressions
 
-            // http://www.w3.org/TR/css3-selectors/#whitespace
+                // http://www.w3.org/TR/css3-selectors/#whitespace
                 whitespace = "[\\x20\\t\\r\\n\\f]",
 
-            // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
+                // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
                 identifier = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",
 
-            // Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
+                // Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
                 attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
                     // Operator (capture 2)
                     "*([*^$|!~]?=)" + whitespace +
@@ -643,7 +643,7 @@
                     ".*" +
                     ")\\)|)",
 
-            // Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
+                // Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
                 rwhitespace = new RegExp(whitespace + "+", "g"),
                 rtrim = new RegExp("^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g"),
 
@@ -676,13 +676,13 @@
 
                 rnative = /^[^{]+\{\s*\[native \w/,
 
-            // Easily-parseable/retrievable ID or TAG or CLASS selectors
+                // Easily-parseable/retrievable ID or TAG or CLASS selectors
                 rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,
 
                 rsibling = /[+~]/,
                 rescape = /'|\\/g,
 
-            // CSS escapes http://www.w3.org/TR/CSS21/syndata.html#escaped-characters
+                // CSS escapes http://www.w3.org/TR/CSS21/syndata.html#escaped-characters
                 runescape = new RegExp("\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig"),
                 funescape = function (_, escaped, escapedWhitespace) {
                     var high = "0x" + escaped - 0x10000;
@@ -698,10 +698,10 @@
                             String.fromCharCode(high >> 10 | 0xD800, high & 0x3FF | 0xDC00);
                 },
 
-            // Used for iframes
-            // See setDocument()
-            // Removing the function wrapper causes a "Permission Denied"
-            // error in IE
+                // Used for iframes
+                // See setDocument()
+                // Removing the function wrapper causes a "Permission Denied"
+                // error in IE
                 unloadHandler = function () {
                     setDocument();
                 };
@@ -741,7 +741,7 @@
                 var m, i, elem, nid, nidselect, match, groups, newSelector,
                     newContext = context && context.ownerDocument,
 
-                // nodeType defaults to 9, since context defaults to document
+                    // nodeType defaults to 9, since context defaults to document
                     nodeType = context ? context.nodeType : 9;
 
                 results = results || [];
@@ -1141,7 +1141,7 @@
                         var elem,
                             tmp = [],
                             i = 0,
-                        // By happy coincidence, a (broken) gEBTN appears on DocumentFragment nodes too
+                            // By happy coincidence, a (broken) gEBTN appears on DocumentFragment nodes too
                             results = context.getElementsByTagName(tag);
 
                         // Filter out possible comments
@@ -1452,7 +1452,7 @@
                 }
 
                 var fn = Expr.attrHandle[name.toLowerCase()],
-                // Don't get fooled by Object.prototype properties (jQuery #13807)
+                    // Don't get fooled by Object.prototype properties (jQuery #13807)
                     val = fn && hasOwn.call(Expr.attrHandle, name.toLowerCase()) ?
                         fn(elem, name, !documentIsHTML) :
                         undefined;
@@ -2257,16 +2257,16 @@
                         postMap = [],
                         preexisting = results.length,
 
-                    // Get initial elements from seeds or context
+                        // Get initial elements from seed or context
                         elems = seed || multipleContexts(selector || "*", context.nodeType ? [context] : context, []),
 
-                    // Prefilter to get matcher input, preserving a map for seeds-results synchronization
+                        // Prefilter to get matcher input, preserving a map for seed-results synchronization
                         matcherIn = preFilter && ( seed || !selector ) ?
                             condense(elems, preMap, preFilter, context, xml) :
                             elems,
 
                         matcherOut = matcher ?
-                            // If we have a postFinder, or filtered seeds, or non-seeds postFilter or preexisting results,
+                            // If we have a postFinder, or filtered seed, or non-seed postFilter or preexisting results,
                             postFinder || ( seed ? preFilter : preexisting || postFilter ) ?
 
                                 // ...intermediate processing is necessary
@@ -2310,7 +2310,7 @@
                                 postFinder(null, (matcherOut = []), temp, xml);
                             }
 
-                            // Move matched elements from seeds to results to keep them synchronized
+                            // Move matched elements from seed to results to keep them synchronized
                             i = matcherOut.length;
                             while (i--) {
                                 if ((elem = matcherOut[i]) &&
@@ -2344,7 +2344,7 @@
                     implicitRelative = leadingRelative || Expr.relative[" "],
                     i = leadingRelative ? 1 : 0,
 
-                // The foundational matcher ensures that elements are reachable from top-level context(s)
+                    // The foundational matcher ensures that elements are reachable from top-level context(s)
                     matchContext = addCombinator(function (elem) {
                         return elem === checkContext;
                     }, implicitRelative, true),
@@ -2405,9 +2405,9 @@
                             unmatched = seed && [],
                             setMatched = [],
                             contextBackup = outermostContext,
-                        // We must always have either seeds elements or outermost context
+                            // We must always have either seed elements or outermost context
                             elems = seed || byElement && Expr.find["TAG"]("*", outermost),
-                        // Use integer dirruns iff this is the outermost matcher
+                            // Use integer dirruns iff this is the outermost matcher
                             dirrunsUnique = (dirruns += contextBackup == null ? 1 : Math.random() || 0.1),
                             len = elems.length;
 
@@ -2457,7 +2457,7 @@
                         // Apply set filters to unmatched elements
                         // NOTE: This can be skipped if there are no unmatched elements (i.e., `matchedCount`
                         // equals `i`), unless we didn't visit _any_ elements in the above loop because we have
-                        // no element matchers and no seeds.
+                        // no element matchers and no seed.
                         // Incrementing an initially-string "0" `i` allows `i` to remain a string only in that
                         // case, which will result in a "00" `matchedCount` that differs from `i` but is also
                         // numerically zero.
@@ -2552,7 +2552,7 @@
 
                 results = results || [];
 
-                // Try to minimize operations if there is only one selector in the list and no seeds
+                // Try to minimize operations if there is only one selector in the list and no seed
                 // (the latter of which guarantees us context)
                 if (match.length === 1) {
 
@@ -2574,7 +2574,7 @@
                         selector = selector.slice(tokens.shift().value.length);
                     }
 
-                    // Fetch a seeds set for right-to-left matching
+                    // Fetch a seed set for right-to-left matching
                     i = matchExpr["needsContext"].test(selector) ? 0 : tokens.length;
                     while (i--) {
                         token = tokens[i];
@@ -2590,7 +2590,7 @@
                                     rsibling.test(tokens[0].type) && testContext(context.parentNode) || context
                                 ))) {
 
-                                // If seeds is empty or no tokens remain, we can return early
+                                // If seed is empty or no tokens remain, we can return early
                                 tokens.splice(i, 1);
                                 selector = seed.length && toSelector(tokens);
                                 if (!selector) {
@@ -2826,9 +2826,9 @@
 // A central reference to the root jQuery(document)
     var rootjQuery,
 
-    // A simple way to check for HTML strings
-    // Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
-    // Strict HTML recognition (#11290: must start with <)
+        // A simple way to check for HTML strings
+        // Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
+        // Strict HTML recognition (#11290: must start with <)
         rquickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,
 
         init = jQuery.fn.init = function (selector, context, root) {
@@ -2949,7 +2949,7 @@
 
     var rparentsprev = /^(?:parents|prev(?:Until|All))/,
 
-    // Methods guaranteed to produce a unique set when starting from a unique set
+        // Methods guaranteed to produce a unique set when starting from a unique set
         guaranteedUnique = {
             children: true,
             contents: true,
@@ -3112,6 +3112,7 @@
     var rnotwhite = ( /\S+/g );
 
 
+
 // Convert String-formatted options into Object-formatted ones
     function createOptions(options) {
         var object = {};
@@ -3154,25 +3155,25 @@
         var // Flag to know if list is currently firing
             firing,
 
-        // Last fire value for non-forgettable lists
+            // Last fire value for non-forgettable lists
             memory,
 
-        // Flag to know if list was already fired
+            // Flag to know if list was already fired
             fired,
 
-        // Flag to prevent firing
+            // Flag to prevent firing
             locked,
 
-        // Actual callback list
+            // Actual callback list
             list = [],
 
-        // Queue of execution data for repeatable lists
+            // Queue of execution data for repeatable lists
             queue = [],
 
-        // Index of currently firing callback (modified by add/remove as needed)
+            // Index of currently firing callback (modified by add/remove as needed)
             firingIndex = -1,
 
-        // Fire callbacks
+            // Fire callbacks
             fire = function () {
 
                 // Enforce single-firing
@@ -3217,7 +3218,7 @@
                 }
             },
 
-        // Actual Callbacks object
+            // Actual Callbacks object
             self = {
 
                 // Add a callback or a collection of callbacks to the list
@@ -3439,15 +3440,15 @@
                 resolveValues = slice.call(arguments),
                 length = resolveValues.length,
 
-            // the count of uncompleted subordinates
+                // the count of uncompleted subordinates
                 remaining = length !== 1 ||
                 ( subordinate && jQuery.isFunction(subordinate.promise) ) ? length : 0,
 
-            // the master Deferred.
-            // If resolveValues consist of only a single Deferred, just use that.
+                // the master Deferred.
+                // If resolveValues consist of only a single Deferred, just use that.
                 deferred = remaining === 1 ? subordinate : jQuery.Deferred(),
 
-            // Update function for both resolve and progress values
+                // Update function for both resolve and progress values
                 updateFunc = function (i, contexts, values) {
                     return function (value) {
                         contexts[i] = this;
@@ -3851,6 +3852,7 @@
     var dataUser = new Data();
 
 
+
 //	Implementation Summary
 //
 //	1. Enforce API surface and semantic compatibility with 1.9.x branch
@@ -4194,7 +4196,7 @@
             initial = currentValue(),
             unit = valueParts && valueParts[3] || ( jQuery.cssNumber[prop] ? "" : "px" ),
 
-        // Starting value computation is required for potential unit mismatches
+            // Starting value computation is required for potential unit mismatches
             initialInUnit = ( jQuery.cssNumber[prop] || unit !== "px" && +initial ) &&
                 rcssNum.exec(jQuery.css(elem, prop));
 
@@ -4247,6 +4249,7 @@
     var rtagName = ( /<([\w:-]+)/ );
 
     var rscriptType = ( /^$|\/(?:java|ecma)script/i );
+
 
 
 // We have to close these tags to support XHTML (#13200)
@@ -5123,12 +5126,12 @@
     var
         rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:-]+)[^>]*)\/>/gi,
 
-    // Support: IE 10-11, Edge 10240+
-    // In IE/Edge using regex groups here causes severe slowdowns.
-    // See https://connect.microsoft.com/IE/feedback/details/1736512/
+        // Support: IE 10-11, Edge 10240+
+        // In IE/Edge using regex groups here causes severe slowdowns.
+        // See https://connect.microsoft.com/IE/feedback/details/1736512/
         rnoInnerhtml = /<script|<style|<link/i,
 
-    // checked="checked" or checked
+        // checked="checked" or checked
         rchecked = /checked\s*(?:[^=]|=\s*.checked.)/i,
         rscriptTypeMasked = /^true\/(.*)/,
         rcleanScript = /^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g;
@@ -5861,9 +5864,9 @@
 
     var
 
-    // Swappable if display is none or starts with table
-    // except "table", "table-cell", or "table-caption"
-    // See here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
+        // Swappable if display is none or starts with table
+        // except "table", "table-cell", or "table-caption"
+        // See here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
         rdisplayswap = /^(none|table(?!-c[ea]).+)/,
 
         cssShow = {position: "absolute", visibility: "hidden", display: "block"},
@@ -6286,7 +6289,7 @@
                 var i = 0,
                     expanded = {},
 
-                // Assumes a single number if not a string
+                    // Assumes a single number if not a string
                     parts = typeof value === "string" ? value.split(" ") : [value];
 
                 for (; i < 4; i++) {
@@ -6703,8 +6706,8 @@
                 var currentTime = fxNow || createFxNow(),
                     remaining = Math.max(0, animation.startTime + animation.duration - currentTime),
 
-                // Support: Android 2.3
-                // Archaic crash bug won't allow us to use `1 - ( 0.5 || 0 )` (#12497)
+                    // Support: Android 2.3
+                    // Archaic crash bug won't allow us to use `1 - ( 0.5 || 0 )` (#12497)
                     temp = remaining / animation.duration || 0,
                     percent = 1 - temp,
                     index = 0,
@@ -6744,8 +6747,8 @@
                 stop: function (gotoEnd) {
                     var index = 0,
 
-                    // If we are going to the end, we want to run all the tweens
-                    // otherwise we skip this part
+                        // If we are going to the end, we want to run all the tweens
+                        // otherwise we skip this part
                         length = gotoEnd ? animation.tweens.length : 0;
                     if (stopped) {
                         return this;
@@ -7971,6 +7974,7 @@
     var rquery = ( /\?/ );
 
 
+
 // Support: Android 2.3
 // Workaround failure to string-cast null input
     jQuery.parseJSON = function (data) {
@@ -8004,33 +8008,33 @@
         rts = /([?&])_=[^&]*/,
         rheaders = /^(.*?):[ \t]*([^\r\n]*)$/mg,
 
-    // #7653, #8125, #8152: local protocol detection
+        // #7653, #8125, #8152: local protocol detection
         rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
         rnoContent = /^(?:GET|HEAD)$/,
         rprotocol = /^\/\//,
 
-    /* Prefilters
-     * 1) They are useful to introduce custom dataTypes (see ajax/jsonp.js for an example)
-     * 2) These are called:
-     *    - BEFORE asking for a transport
-     *    - AFTER param serialization (s.data is a string if s.processData is true)
-     * 3) key is the dataType
-     * 4) the catchall symbol "*" can be used
-     * 5) execution will start with transport dataType and THEN continue down to "*" if needed
-     */
+        /* Prefilters
+         * 1) They are useful to introduce custom dataTypes (see ajax/jsonp.js for an example)
+         * 2) These are called:
+         *    - BEFORE asking for a transport
+         *    - AFTER param serialization (s.data is a string if s.processData is true)
+         * 3) key is the dataType
+         * 4) the catchall symbol "*" can be used
+         * 5) execution will start with transport dataType and THEN continue down to "*" if needed
+         */
         prefilters = {},
 
-    /* Transports bindings
-     * 1) key is the dataType
-     * 2) the catchall symbol "*" can be used
-     * 3) selection will start with transport dataType and THEN go to "*" if needed
-     */
+        /* Transports bindings
+         * 1) key is the dataType
+         * 2) the catchall symbol "*" can be used
+         * 3) selection will start with transport dataType and THEN go to "*" if needed
+         */
         transports = {},
 
-    // Avoid comment-prolog char sequence (#10098); must appease lint and evade compression
+        // Avoid comment-prolog char sequence (#10098); must appease lint and evade compression
         allTypes = "*/".concat("*"),
 
-    // Anchor tag for parsing the document origin
+        // Anchor tag for parsing the document origin
         originAnchor = document.createElement("a");
     originAnchor.href = location.href;
 
@@ -8179,7 +8183,7 @@
         var conv2, current, conv, tmp, prev,
             converters = {},
 
-        // Work with a copy of dataTypes in case we need to modify it for conversion
+            // Work with a copy of dataTypes in case we need to modify it for conversion
             dataTypes = s.dataTypes.slice();
 
         // Create converters map with lowercased keys
@@ -8377,55 +8381,55 @@
 
             var transport,
 
-            // URL without anti-cache param
+                // URL without anti-cache param
                 cacheURL,
 
-            // Response headers
+                // Response headers
                 responseHeadersString,
                 responseHeaders,
 
-            // timeout handle
+                // timeout handle
                 timeoutTimer,
 
-            // Url cleanup var
+                // Url cleanup var
                 urlAnchor,
 
-            // To know if global events are to be dispatched
+                // To know if global events are to be dispatched
                 fireGlobals,
 
-            // Loop variable
+                // Loop variable
                 i,
 
-            // Create the final options object
+                // Create the final options object
                 s = jQuery.ajaxSetup({}, options),
 
-            // Callbacks context
+                // Callbacks context
                 callbackContext = s.context || s,
 
-            // Context for global events is callbackContext if it is a DOM node or jQuery collection
+                // Context for global events is callbackContext if it is a DOM node or jQuery collection
                 globalEventContext = s.context &&
                 ( callbackContext.nodeType || callbackContext.jquery ) ?
                     jQuery(callbackContext) :
                     jQuery.event,
 
-            // Deferreds
+                // Deferreds
                 deferred = jQuery.Deferred(),
                 completeDeferred = jQuery.Callbacks("once memory"),
 
-            // Status-dependent callbacks
+                // Status-dependent callbacks
                 statusCode = s.statusCode || {},
 
-            // Headers (they are sent all at once)
+                // Headers (they are sent all at once)
                 requestHeaders = {},
                 requestHeadersNames = {},
 
-            // The jqXHR state
+                // The jqXHR state
                 state = 0,
 
-            // Default abort message
+                // Default abort message
                 strAbort = "canceled",
 
-            // Fake xhr
+                // Fake xhr
                 jqXHR = {
                     readyState: 0,
 
@@ -9780,10 +9784,10 @@
 
     var
 
-    // Map over jQuery in case of overwrite
+        // Map over jQuery in case of overwrite
         _jQuery = window.jQuery,
 
-    // Map over the $ in case of overwrite
+        // Map over the $ in case of overwrite
         _$ = window.$;
 
     jQuery.noConflict = function (deep) {

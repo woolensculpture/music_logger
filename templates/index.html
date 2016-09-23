@@ -2,38 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WITR 89.7 almost endless music logger</title>
     <!-- replace links with either nginx serving them or pulling from internet source -->
-    <link rel="foundation-css" href="{{ url_for('static',  filename='foundation/css/app.css') }}">
-    <link rel="foundation-css" href="{{ url_for('static',  filename='foundation/css/foundation.min.css') }}">
+    <link rel="foundation-css" type="text/css"
+          href="{{ url_for('static', filename='foundation/css/foundation.min.css') }}"/>
+    <link rel="logger-css" type="text/css" href=http://127.0.0.1"{{ url_for('static', filename='logger/main.css') }}"/>
     <script rel="foundation-js" src="{{ url_for('static', filename='foundation/js/vendor/jquery.js') }}"></script>
     <script rel="foundation-js" src="{{ url_for('static', filename='logger/socket.io.min.js') }}"></script>
 
+    <script rel="foundation-js" src="{{ url_for('static', filename='foundation/js/vendor/what-input.js') }}"></script>
     <script rel="foundation-js"
             src="{{ url_for('static', filename='foundation/js/vendor/foundation.min.js') }}"></script>
-    <script rel="foundation-js" src="{{ url_for('static', filename='foundation/js/app.js') }}"></script>
-    <script rel="foundation-js" src="{{ url_for('static', filename='foundation/js/vendor/what-input.js') }}"></script>
-    <script rel="foundation-js" src="{{ url_for('static', filename='logger/controls.js') }}"></script>
-    <script rel="foundation-js" src="{{ url_for('static', filename='logger/main.js') }}"></script>
-    <script rel="foundation-js" src="{{ url_for('static', filename='foundation/js/vendor/what-input.js') }}"></script>
+    {% if detailed == true %}
+        <script>var detailed = true</script>
+    {% else %}
+        <script>var detailed = false</script>
+    {% endif %}
+    <!--    <script rel="foundation-js" src="{{ url_for('static', filename='logger/controls.js') }}"></script> -->
+    <script rel="logger-js" src="{{ url_for('static', filename='logger/main.js') }}"></script>
+
 </head>
 <body>
-<div id="header" class="row"><h1>WITR 89.7 (Near) Endless Song Logger</h1></div>
+<script> $(document).foundation(); </script>
+<div class="grid-frame vertical">
+    <div id="title" class="row">
+        <div class="large-3 columns"><a href="https://witr.rit.edu"><h1>WITR 89.7</h1></a></div>
+        <div class="large-9 columns"><h2 class="text-right">(Near) Endless Song Logger</h2></div>
+    </div>
 <div class="row">
-    <div class="column"><h5>Time Played</h5></div>
-    <div class="column"><h5>Artist</h5></div>
-    <div class="column"><h5>Title</h5></div>
-    <div class="column"><h5>Played</h5></div>
-    {% if detailed== true %}
-        <div class="column"><h5>rvdl</h5></div>
-        <div class="column"><h5>group</h5></div>
-    <div class="column"><h5>Request</h5></div>
-    <div class="column"><h5>Requester</h5></div>
-    {% endif %}
+    <div class="input-group">
+        <input id='artistInput' class="input-group-field" type="text" placeholder="Artist">
+        <input id='titleInput' class="input-group-field" type="text" placeholder="Title">
+        <input id="Search" class="button" type="submit" value="Search">
+    </div>
 </div>
+    <div class="row">
+        <div class="large-11 column float-center">
+            <table>
+                <thead id="column_headers">
+                <tr>
+                    <th><h4>Artist</h4></th>
+                    <th><h4>Title</h4></th>
+                    <th><h4>Play Time</h4></th>
+                    {% if detailed == true %}
+                        <th><h4>rvdl</h4></th>
+                        <th><h4>group</h4></th>
+                        <th><h4>Requester</h4></th>
+    {% endif %}
+                </tr>
+                </thead>
+            </table>
+</div>
+    </div>
 <!-- the tracks -->
-<div class="row">
-    <!-- pagination -->
+    <div class="row align-center">
+        <ul class="pagination" role="navigation" aria-label="Pagination">
+            <li class="pagination-previous disabled">Previous <span class="show-for-sr">page</span></li>
+            <li class="current"><span class="show-for-sr">You're on page</span> 1</li>
+            <li><a href="#" aria-label="Page 2">2</a></li>
+            <li class="ellipsis" aria-hidden="true"></li>
+            <li class="pagination-next"><a href="#" aria-label="Next page">Next <span
+                    class="show-for-sr">page</span></a></li>
+        </ul>
+    </div>
 </div>
 </body>
 </html>

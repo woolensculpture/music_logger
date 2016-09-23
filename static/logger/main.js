@@ -1,17 +1,19 @@
 /**
  * Created by Benjamin Reynolds on 5/1/2016.
  */
-(function display($) {
+(function display($, d) {
     var socket = io.connect('http://' + document.domain + ':' + location.port);
-    socket.on('connect', function () {
-        socket.emit('search', p);
+    socket.on('connected', function (tracks) {
+        JSON.parse(tracks).forEach(addTrackToTop);
     });
+
     socket.on('addTracks', function (Tracks) {
-        Tracks.forEach(addTrack);
+        JSON.parse(Tracks).forEach(addTrack);
     });
 
     socket.on('updateTrack', function (id, time, title, artist, group, rivendell, requester) {
-        $("#" + id.toString());
+        var row = $("tr#" + id.toString()).fadeOut();
+        row.propertyIsEnumerable()
     });
 
     socket.on('removeTrack', function (id) {
@@ -21,17 +23,25 @@
     /* pagination: store date range client side and query */
     function nextRange() {
         socket.send();
-        $(".row[id!=header]").remove();
+        $("tr").fadeOut("fast").remove();
     }
 
-    function search(id, time, title, artist, group, rivendell, requester) {
+    $("#Search").onclick(function () {
+        socket.send('search', {'title': title, 'artist': artist, 'start': start.toString(), 'end': end.toString()});
+    });
 
+    function addTrackToTop(track) {
+        console.log(track);
+        $("<tr id='" + track.id + "' >" +
+            "<td class='text-center'>" + track.artist + "</td>" +
+            "<td  class='text-center'>" + track.title + "</td>" +
+            "<td  class='text-center'>" + track.time + "</td>" +
+            (detailed ?
+            "<td  class='text-center'>" +
+            ( track.rvdl ? "<a class='button tiny disabled round alert'>rvdl</a>" : "") +
+            "</td>" +
+            "<td  class='text-center'>" + track.group + "</td>" +
+            "<td  class='text-center'>" + (track.requester ? track.requester : "" ) + "</td>" : "") +
+            "</tr>").hide().insertAfter($("#column_headers")).fadeIn("slow");
     }
-
-    function addTrack(id, time, artist, title) {
-        $("div#header").insertAfter("<div id='" + id + "' class='row'><div class='column'>" + time +
-            "</div><div class='column'>" + artist + "</div><div class='column'>" + title + "</div></div>");
-    }
-
-    b
-})(jQuery);
+})(jQuery, detailed);

@@ -11,6 +11,7 @@ class Config(object):
     DB_HOST = ''
     DB_NAME = 'music_logger'
     SQLALCHEMY_DATABASE_URI = 'mysql://' + DB_USER + ':' + DB_PASSWORD + '@' + DB_HOST + '/' + DB_NAME
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class Production(Config):
@@ -31,6 +32,9 @@ class Staging(Config):
 class Development(Config):
     TESTING = True
     DEBUG = True
-    DB_USER = 'music_logger'
+    DB_USER = 'root'
     DB_HOST = 'localhost'
     DB_NAME = 'music_logger'
+    DB_PASSWORD = 'Ax^2+Bx+C=y'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://' + DB_USER + ':' + DB_PASSWORD + '@' + DB_HOST + '/' + DB_NAME
