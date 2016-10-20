@@ -1,0 +1,4 @@
+venv/
+.idea/workspace.xml
+.idea/dictionaries/
+__pycache__/
