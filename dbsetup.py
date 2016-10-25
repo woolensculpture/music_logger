@@ -17,10 +17,13 @@ connection = pymysql.connect(host=app.config.get("DB_HOST"),
 
 
 def create(args):
-    if any(x in args for x in ['-h', '--help']):
-        print("usage: dbsetup")
+    if any(x.lower() in args for x in ['-h', '--help']):
+        print("Usage:\n  dbsetup [options]\n")
+        print("Options:\n  -e, --erase\t\tResets the database 'Test' without seeding track data\n"
+              "  -s, --seed\t\tAdds track data into the database")
+        return
     try:
-        if any(x in args for x in ['-E', '--Erase']):
+        if any(x.lower() in args for x in ['-e', '--erase']):
             with connection as cur:
                 cur.execute('DROP DATABASE IF EXISTS test;')
                 cur.execute('CREATE DATABASE test;')
@@ -30,7 +33,7 @@ def create(args):
         read_sql_file(connection, groupsDataFile)
     finally:
         connection.close()
-    if any(x in args for x in ['-s', '--seed']):
+    if any(x.lower() in args for x in ['-s', '--seed']):
         seed_tracks()
 
 
@@ -50,4 +53,4 @@ def read_sql_file(connect, file):
                     cursor.execute(x)
     connection.commit()
 
-# create(argv)
+create(argv)
