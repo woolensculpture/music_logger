@@ -26,22 +26,25 @@
         $("tr").fadeOut("fast").remove();
     }
 
-    $("#Search").onclick(function () {
+    $("#Search").click(function () {
         socket.send('search', {'title': title, 'artist': artist, 'start': start.toString(), 'end': end.toString()});
     });
 
+    /**
+     * Adds tracks into the logger_body ID element, the body tag of the main table
+     */
     function addTrackToTop(track) {
         console.log(track);
         $("<tr id='" + track.id + "' >" +
-            "<td class='text-center'>" + track.artist + "</td>" +
-            "<td  class='text-center'>" + track.title + "</td>" +
-            "<td  class='text-center'>" + track.time + "</td>" +
+            "<td>" + track.artist + "</td>" +
+            "<td>" + track.title + "</td>" +
+            "<td>" + track.time + "</td>" +
             (detailed ?
-            "<td  class='text-center'>" +
+            "<td>" +
             ( track.rvdl ? "<a class='button tiny disabled round alert'>rvdl</a>" : "") +
             "</td>" +
-            "<td  class='text-center'>" + track.group + "</td>" +
-            "<td  class='text-center'>" + (track.requester ? track.requester : "" ) + "</td>" : "") +
-            "</tr>").hide().insertAfter($("#column_headers")).fadeIn("slow");
+            "<td>" + track.group + "</td>" +
+            "<td>" + (track.requester ? track.requester : "" ) + "</td>" : "") +
+            "</tr>").hide().prependTo($("#logger_body")).fadeIn("slow");
     }
 })(jQuery, detailed);

@@ -103,8 +103,12 @@ def db_overwatch():
 
 
 def tracks_to_json(query):
-    """function for converting tracks to json and prettifying the
-    json while debugging, switch to compact for deployment"""
+    """
+    function for converting tracks to json and prettifying the
+    json while debugging, switch to compact for deployment
+    :param query:
+    :return: 
+    """
     obj = []
     if isinstance(query, list):
         for track in query:
