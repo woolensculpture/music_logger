@@ -4,7 +4,7 @@
 (function display($, d) {
     var socket = io.connect('http://' + document.domain + ':' + location.port);
     socket.on('connected', function (tracks) {
-        JSON.parse(tracks).forEach(addTrackToTop);
+        // JSON.parse(tracks).forEach(addTrackToTop);
     });
 
     socket.on('addTracks', function (Tracks) {
@@ -13,7 +13,7 @@
 
     socket.on('updateTrack', function (id, time, title, artist, group, rivendell, requester) {
         var row = $("tr#" + id.toString()).fadeOut();
-        row.propertyIsEnumerable()
+        row.propertyIsEnumerable();
     });
 
     socket.on('removeTrack', function (id) {
@@ -31,10 +31,10 @@
     });
 
     /**
-     * Adds tracks into the logger_body ID element, the body tag of the main table
+     * Adds tracks into the logger_body ID element - the body tag of the main table
      */
     function addTrackToTop(track) {
-        console.log(track);
+        // console.log(track);
         $("<tr id='" + track.id + "' >" +
             "<td>" + track.artist + "</td>" +
             "<td>" + track.title + "</td>" +
