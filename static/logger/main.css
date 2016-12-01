@@ -1,3 +1,30 @@
-/*table td, tr {*/
-    /*border: 1px solid #909090;*/
+/*Table Striping*/
+/*table tr:nth-of-type(even), th {*/
+/*background-color: #e6f2ff !important;*/
 /*}*/
+
+.table-feature {
+    background-color: #afd0f5 !important;
+}
+
+.table-newbin {
+    background-color: #e6f2ff !important;
+}
+
+.table-library {
+    background-color: #ffffff !important;
+}
+
+/*Button Customization*/
+button.radius, .button.radius {
+    border-radius: 3px;
+}
+
+button.round, .button.round {
+    border-radius: 1000px;
+}
+
+button.rvdl, .button.rvdl {
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}

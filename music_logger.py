@@ -15,23 +15,24 @@ app = Flask(__name__)
 app.config.from_object(Development)  # change loaded config name to change attributes
 db.init_app(app)
 socketio = SocketIO(app)
+# Used to set the number of songs to be loaded per page in the logger
+itemsPerPage = 30
 
 
 # Note: While developing many changes to this file required the project to be reloaded to take effect
 
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index', methods=['GET', 'POST'])
-@app.route('/index/', methods=['GET', 'POST'])
-@app.route('/index/<int:page>', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
+@app.route('/index/', methods=['GET'])
+@app.route('/index/<int:page>', methods=['GET'])
 def index(page=1):
     """
     Sets up pagination and gets data for the logger.
-    The second variable within the paginate call determines the number of items per page
     :param page: Starting page
     :return:
     """
-    tracks = models.Track.query.order_by(desc(Track.created_at)).paginate(page, 10, False)
+    tracks = models.Track.query.order_by(desc(Track.created_at)).paginate(page, itemsPerPage, False)
     # Formatting time for display
     for track in tracks.items:
         track.created_at = track.created_at.strftime("%x %I:%M %p")
@@ -48,18 +49,16 @@ def latest():
     return tracks_to_json(Track.query.order_by(Track.created_at).first())
 
 
-@app.route('/Details', methods=['GET', 'POST'])
-@app.route('/Details/', methods=['GET', 'POST'])
-@app.route('/index/Details', methods=['GET', 'POST'])
-@app.route('/index/Details/<int:page>', methods=['GET', 'POST'])
+@app.route('/details', methods=['GET'])
+@app.route('/details/', methods=['GET'])
+@app.route('/details/<int:page>', methods=['GET'])
 def details(page=1):
     """
     Shows the in-station extra information
-    The second variable within the paginate call determines the number of items per page
     :param page:
     :return: Starting page
     """
-    tracks = models.Track.query.order_by(desc(Track.created_at)).paginate(page, 10, False)
+    tracks = models.Track.query.order_by(desc(Track.created_at)).paginate(page, itemsPerPage, False)
     # Formatting time for display
     for track in tracks.items:
         track.created_at = track.created_at.strftime("%x %I:%M %p")
@@ -70,6 +69,7 @@ def details(page=1):
 def startup():
     """
     When logger starts gets a number of tracks
+    ***Not currently in use***
     :return:
     """
     tracks = Track.query.order_by(Track.created_at).limit(5).all()

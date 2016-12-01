@@ -28,14 +28,17 @@
         <div class="small-9 column"><h2 class="text-right">(Near) Endless Song Logger</h2></div>
     </div>
     <div class="row">
-        <div class="small-3 small-offset-3 column">
+        <div class="small-2 small-offset-4 column">
             <input id='artistInput' class="input-group-field" type="text" placeholder="Artist">
         </div>
-        <div class="small-3 column">
+        <div class="small-2 column">
             <input id='titleInput' class="input-group-field" type="text" placeholder="Title">
         </div>
-        <div class="small-3 column">
-            <input id="Search" class="button" type="submit" value="Search">
+        <div class="small-2 column">
+            <input id='dateTimeInput' class="input-group-field" type="text" placeholder="Select Date/Time">
+        </div>
+        <div class="small-2 column">
+            <input id="Search" class="expanded button" type="submit" value="Search">
         </div>
     </div>
     <div class="row">
@@ -47,7 +50,6 @@
                     <th><h3>Title</h3></th>
                     <th><h3>Play Time</h3></th>
                     {% if detailed == true %}
-                        <th><h3>RVNDL</h3></th>
                         <th><h3>Group</h3></th>
                         <th><h3>Requester</h3></th>
                     {% endif %}
@@ -55,17 +57,31 @@
                 </thead>
                 <tbody id="logger_body">
                 {% for track in tracks.items %}
-                    <tr id={{ track.id }}>
-                        <td>{{ track.artist }}</td>
-                        <td>{{ track.title }}</td>
-                        <td>{{ track.created_at }}</td>
-                        {% if detailed == true %}
-                            <td> {{ track.rvdl }}
-                                <a class='button tiny disabled round alert'>rvdl</a>
-                            </td>
-                            <td> {{ track.group.name }}</td>
-                            <td> {{ track.requester }}</td>
-                        {% endif %}
+                    <tr id={{ track.id }}
+                                {% if track.group.name == 'Feature' %}
+                                    class = 'table-feature'
+                                {% elif track.group.name == 'New Bin' %}
+                                    class = 'table-newbin'
+                                {% else %}
+                                    class = 'table-library'
+                                {% endif %}
+                    >
+                    <td>{{ track.artist }}</td>
+                    <td>{{ track.title }}</td>
+                    <td>{{ track.created_at }}</td>
+                    {% if detailed == true %}
+                        <td> {{ track.group.name }}</td>
+                        <td>
+                            {% if track.requester != None %}
+                                {{ track.requester }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if track.rivendell %}
+                                <a class='small radius rvdl button'>RVDL</a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -78,16 +94,30 @@
             <ul class="pagination" role="navigation" aria-label="Pagination">
                 {% if tracks.has_prev %}
                     <li class="pagination-previous">
-                        <a href="{{ url_for("index", page=tracks.prev_num) }}"> Previous <span
-                                class="show-for-sr">page</span></a>
+                        {% if detailed == true %}
+                            <a href="{{ url_for("details", page=tracks.prev_num) }}"> Previous <span
+                                    class="show-for-sr">page</span></a>
+                        {% else %}
+                            <a href="{{ url_for("index", page=tracks.prev_num) }}"> Previous <span
+                                    class="show-for-sr">page</span></a>
+                        {% endif %}
                     </li>
                 {% else %}
                     <li class="pagination-previous disabled">Previous <span class="show-for-sr">page</span></li>
                 {% endif %}
+
+                {# Customize the amount of page numbers show with iter_pages parameters #}
                 {% for page in tracks.iter_pages() %}
                     {% if page %}
                         {% if page != tracks.page %}
-                            <li><a href="{{ url_for("index", page=page) }}" aria-label="Page {{ page }}">{{ page }}</a>
+                            <li>
+                                {% if detailed == true %}
+                                    <a href="{{ url_for("details", page=page) }}"
+                                       aria-label="Page {{ page }}">{{ page }}</a>
+                                {% else %}
+                                    <a href="{{ url_for("index", page=page) }}"
+                                       aria-label="Page {{ page }}">{{ page }}</a>
+                                {% endif %}
                             </li>
                         {% else %}
                             <li class="current"><span class="show-for-sr">You're on page</span> {{ page }}</li>
@@ -98,8 +128,13 @@
                 {%- endfor %}
                 {% if tracks.has_next %}
                     <li class="pagination-next">
-                        <a href="{{ url_for("index", page=tracks.next_num) }}" aria-label="Next page">Next <span
-                                class="show-for-sr">page</span></a>
+                        {% if detailed == true %}
+                            <a href="{{ url_for("details", page=tracks.next_num) }}" aria-label="Next page">Next <span
+                                    class="show-for-sr">page</span></a>
+                        {% else %}
+                            <a href="{{ url_for("index", page=tracks.next_num) }}" aria-label="Next page">Next <span
+                                    class="show-for-sr">page</span></a>
+                        {% endif %}
                     </li>
                 {% else %}
                     <li class="pagination-next disabled">Previous <span class="show-for-sr">page</span></li>
