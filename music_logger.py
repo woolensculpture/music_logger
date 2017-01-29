@@ -1,10 +1,12 @@
 import threading
+import gevent
+from gevent.wsgi import WSGIServer
+from gevent.queue import Queue
 from datetime import datetime
 from json import dumps, loads
 from time import sleep
 
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask import Flask, Response, render_template
 
 from config import Development
 from models import Track, db
@@ -12,9 +14,64 @@ from models import Track, db
 app = Flask(__name__)
 app.config.from_object(Development)  # change loaded config name to change attributes
 db.init_app(app)
-socketio = SocketIO(app)
+
+subscriptions = []
 
 
+# code originally from http://flask.pocoo.org/snippets/116/
+class ServerSentEvent(object):
+    def __init__(self, data):
+        self.data = data
+        self.event = None
+        self.id = None
+        self.desc_map = {
+            self.data: "data",
+            self.event: "event",
+            self.id: "id"
+        }
+
+    def __str__(self):
+        if not self.data:
+            return ""
+        lines = ["%s: %s" % (v, k) for k, v in self.desc_map.items() if k]
+        return "\n".join(lines) + "\n\n"
+
+
+# Client code consumes like this.
+@app.route("/debug")
+def debug():
+    return "Currently %d subscriptions" % len(subscriptions)
+
+
+@app.route("/publish")
+def publish():
+    # Dummy data - pick up from request for real data
+    def notify():
+        msg = str(datetime.time())
+        for sub in subscriptions:
+            sub.put(msg)
+    gevent.spawn(notify)
+    return "OK"
+
+
+@app.route("/subscribe")
+def subscribe():
+    def gen():
+        q = Queue()
+        subscriptions.append(q)
+        try:
+            while True:
+                result = q.get()
+                ev = ServerSentEvent(str(result))
+                yield str(ev)
+        except GeneratorExit:  # Or maybe use flask signals
+            subscriptions.remove(q)
+    return Response(gen(), mimetype="text/event-stream")
+
+
+# TODO decide whether to use polyfill for browsers with SSE (IE and Edge) options are:
+# https://github.com/remy/polyfills/blob/master/EventSource.js
+# https://github.com/rwaldron/jquery.eventsource
 @app.route('/')
 def page():
     return render_template("index.html")
@@ -26,47 +83,42 @@ def latest():
     return tracks_to_json(Track.query.order_by(Track.created_at).first())
 
 
+# TODO decide whether to use polyfill for browsers with SSE (IE and Edge)
 @app.route('/Details')
 def details():
     return render_template("index.html", detailed=True)
 
 
-@socketio.on('connect')
-def startup():
-    tracks = Track.query.order_by(Track.created_at).limit(20).all()
-    print("got signal")
-    emit('connected', tracks_to_json(tracks), json=True)
-
-
-@socketio.on('addTrack')
+# TODO Refactor for SSE pushing
+@app.route('/controls/addTrack')
 def add_track(track):
     a_track = loads(track)
     db_track = Track(a_track['artist'], a_track['title'], a_track['group'],
                      a_track['time'], a_track['request'], a_track['requester'])
     db.session.add(db_track)
     db.session.commit()
-    emit('addTracks', track, json=True, broadcast=True)
 
 
-@socketio.on('updateTrack')
+# TODO refactor for SSE pushing
+@app.route('/controls/updateTrack')
 def update_track(track):
     dict_track = loads(track)
     track_to_update = Track.query.get(dict_track['id'])
     for column in dict_track:
         setattr(track_to_update, column, dict_track[column])
     db.session.commit()
-    emit('updateTrack', track, json=True, broadcast=True)
 
 
-@socketio.on('removeTrack')
+# TODO refactor for SSE pushing
+@app.route('/controls/removeTrack')
 def remove_track(track_id):
     track = Track.query.get(track_id)
     db.session.delete(track)
     db.session.commit()
-    emit('removeTrack', track_id, broadcast=True)
 
 
-@socketio.on('query')
+# TODO refactor for SSE pushing
+@app.route('/search')
 def search_track(start=None, end=None, title=None, artist=None):
     results = Track.query
     if start is not None:
@@ -77,7 +129,6 @@ def search_track(start=None, end=None, title=None, artist=None):
         results = results.filter(Track.artist.like(artist))
     if title is not None:
         results = results.filter(Track.title.like(artist))
-    emit('results', tracks_to_json(results.limit().all()), json=True)
 
 
 # watch over the database and push updates when rvdl or another source updates and it does not go through the server.
@@ -86,6 +137,8 @@ def search_track(start=None, end=None, title=None, artist=None):
 # command output over udp instead of querying the database directly for changes. This will increase performance in all
 # accept a few edge cases. However whatever you do, DO NOT OPEN UP A TRANSACTION FOR EVERY REQUEST. This leads to
 # a security and memory leak issue this application was designed to fix compared to the php version.
+
+# TODO create exception and modify to use SSE
 def db_overwatch():
     # TODO: have threaded function that connects to database, make updated tracks
     # query: SELECT * FROM Tracks JOIN Groups ON Tracks.group_id=Groups.id WHERE Tracks.created_at >= time;
@@ -96,7 +149,6 @@ def db_overwatch():
     while True:
         new_tracks = Track.query(Track.created_at >= time).all()  # get all newly created tracks since last check
         new_tracks = [track for track in new_tracks if track not in old_tracks]  # filter out already emitted tracks
-        emit("addTracks", tracks_to_json(new_tracks))
         old_tracks = new_tracks + [track for track in old_tracks if track.created_at >= time]
         sleep(3)
     return db_overwatch()
@@ -122,6 +174,6 @@ def tracks_to_json(query):
 
 
 if __name__ == '__main__':
-    app.run()
-    socketio.run(app)
+    server = WSGIServer(("127.0.0.1", 5000), app)
+    server.serve_forever()
     threading.Thread(db_overwatch())
