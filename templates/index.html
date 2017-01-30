@@ -8,18 +8,15 @@
     <link rel="icon" type="image/ico" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='logger/main.css') }}"/>
     <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='foundation/css/foundation.min.css') }}">
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='datetimepicker/css/foundation-datepicker.css') }}">
     <script src="{{ url_for('static', filename='foundation/js/vendor/jquery.js') }}"></script>
-    <script src="{{ url_for('static', filename='logger/socket.io.min.js') }}"></script>
     <script src="{{ url_for('static', filename='foundation/js/vendor/what-input.js') }}"></script>
     <script src="{{ url_for('static', filename='foundation/js/vendor/foundation.min.js') }}"></script>
-    {% if detailed == true %}
-        <script>var detailed = true</script>
-    {% else %}
-        <script>var detailed = false</script>
-    {% endif %}
+    <script>var detailed = {% if detailed %}true{% else %}false{% endif %};</script>
     {#Controls and Main JS files must load after "detailed" variable is assigned#}
     <script src="{{ url_for('static', filename='logger/controls.js') }}"></script>
     <script src="{{ url_for('static', filename='logger/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='datetimepicker/js/foundation-datepicker.js')}}"></script>
 </head>
 <body>
 <div class="grid-frame vertical">
@@ -28,17 +25,72 @@
         <div class="small-9 column"><h2 class="text-right">(Near) Endless Song Logger</h2></div>
     </div>
     <div class="row">
+        {% if control %}
+            <div class ="small-2 column">
+            <input id="Search" class="success expanded button" type="submit" action="createTrack()" value="Search">
+            </div>
+        {% endif %}
         <div class="small-2 small-offset-4 column">
             <input id='artistInput' class="input-group-field" type="text" placeholder="Artist">
         </div>
         <div class="small-2 column">
             <input id='titleInput' class="input-group-field" type="text" placeholder="Title">
         </div>
-        <div class="small-2 column">
-            <input id='dateTimeInput' class="input-group-field" type="text" placeholder="Select Date/Time">
+        <div class="small-4 column">
+            <table class="table">
+	            <thead>
+		            <tr>
+			            <th>Start date&nbsp;
+				            <a href="#" class="button tiny" id="startSelector" data-date-format="mm-dd-yyyy hh:ii" data-date="2012-02-20">Change</a>
+			            </th>
+			            <th>End date&nbsp;
+				            <a href="#" class="button tiny" id="endSelector" data-date-format="mm-dd-yyyy hh:ii" data-date="2012-02-25">Change</a>
+                        </th>
+		            </tr>
+	            </thead>
+	                <tbody>
+		                <tr>
+			                <td id="startDate"></td>
+			                <td id="endDate"></td>
+		                </tr>
+	                </tbody>
+            </table>
+            <div class="alert alert-box"  style="display:none;" id="alert"><strong>Oh snap!</strong></div>
         </div>
+        <script>
+            //TODO make into its own file
+            $(function(){
+              // implementation of custom elements instead of inputs
+                var startDate = new Date(2012, 1, 20);
+                var endDate = new Date(2012, 1, 25);
+                var startSelector = $('#startSelector');
+                startSelector.fdatepicker({})
+                    .on('changeDate', function (ev) {
+                    if (ev.date.valueOf() > endDate.valueOf()) {
+                        $('#alert').show().find('strong').text('The start date can not be greater then the end date');
+                    } else {
+                        $('#alert').hide();
+                        startDate = new Date(ev.date);
+                        $('#startDate').text(startSelector.data('date'));
+                    }
+                    startSelector.fdatepicker('hide');
+                });
+                var endSelector = $('#endSelector');
+                endSelector.fdatepicker()
+                    .on('changeDate', function (ev) {
+                    if (ev.date.valueOf() < startDate.valueOf()) {
+                        $('#alert').show().find('strong').text('The end date can not be less then the start date');
+                    } else {
+                        $('#alert').hide();
+                        endDate = new Date(ev.date);
+                        $('#endDate').text(endSelector.data('date'));
+                    }
+                    endSelector.fdatepicker('hide');
+                });
+            });
+        </script>
         <div class="small-2 column">
-            <input id="Search" class="expanded button" type="submit" value="Search">
+            <input id="Search" class="expanded button" type="submit" action="search()" value="Search">
         </div>
     </div>
     <div class="row">
@@ -58,21 +110,21 @@
                 </thead>
                 <tbody id="logger_body">
                 {% for track in tracks.items %}
-                    <tr id={{ track.id }}
+                    <tr id='{{ track.id }}' class='track
                                 {% if track.group.name == 'Feature' and detailed == true %}
-                                    class = 'table-feature'
+                                    table-feature
                                 {% elif track.group.name == 'New Bin' and detailed == true %}
-                                    class = 'table-newbin'
+                                    table-newbin
                                 {% else %}
-                                    class = 'table-library'
+                                    table-library
                                 {% endif %}
-                    >
-                    <td>{{ track.artist }}</td>
-                    <td>{{ track.title }}</td>
-                    <td>{{ track.created_at }}</td>
+                    '>
+                    <td class="artist">{{ track.artist }}</td>
+                    <td class="title">{{ track.title }}</td>
+                    <td class="time">{{ track.created_at }}</td>
                     {% if detailed == true %}
-                        <td> {{ track.group.name }}</td>
-                        <td>
+                        <td class="group"> {{ track.group.name }}</td>
+                        <td class="requester">
                             {% if track.requester != None %}
                                 {{ track.requester }}
                             {% endif %}
@@ -82,12 +134,14 @@
                                 <button class='small radius rvdl button'>RVDL</button>
                             {% endif %}
                         </td>
-                        <td>
-                            <a class='small radius default button'>Edit</a>
-                        </td>
-                        <td>
-                            <a class='small radius alert button'>Delete</a>
-                        </td>
+                        {% if controller %}
+                            <td>
+                                <a class='warning small radius default button'>Edit</a>
+                            </td>
+                            <td>
+                                <a class='alert small radius alert button'>Delete</a>
+                            </td>
+                        {% endif %}
                     {% endif %}
                     </tr>
                 {% endfor %}

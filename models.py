@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-
+from json import dumps
 db = SQLAlchemy()
 
 
@@ -41,6 +41,14 @@ class Track(db.Model):
         self.time = time
         self.request = request
         self.requester = requester
+
+    def to_json(self, detailed=False):
+        track = {'id': self.id, 'artist': self.artist, 'title': self.title,
+                          'time': self.created_at.strftime("%x %I:%M %p")}
+        if detailed:
+            track['requester'] = self.requester
+            track['group'] = self.group.name
+        return dumps(track, separators=(',', ':'))
 
     def __repr__(self):
         return '<Track:artist %r, title %r, time %r>' % self.artist, self.title, self.created_at

@@ -2,7 +2,8 @@ server-side:
 python              3.5.1
 Flask               0.10.1
 Flask-SQLAlchemy	2.1
-Flask-SocketIO		2.3
+gevent              1.2.1
+netaddr             0.7.19
 pytz	            2016.4
 PyMySQL (for windows development)
 

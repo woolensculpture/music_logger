@@ -5,8 +5,10 @@ from gevent.queue import Queue
 from datetime import datetime
 from json import dumps, loads
 from time import sleep
+from sqlalchemy import desc
+from netaddr import IPAddress, IPNetwork
 
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 
 from config import Development
 from models import Track, db
@@ -19,8 +21,12 @@ subscriptions = []
 
 # Note: While developing many changes to this file required the project to be reloaded to take effect
 
+
 # code originally from http://flask.pocoo.org/snippets/116/
 class ServerSentEvent(object):
+    """
+
+    """
     def __init__(self, data):
         self.data = data
         self.event = None
@@ -44,19 +50,12 @@ def debug():
     return "Currently %d subscriptions" % len(subscriptions)
 
 
-@app.route("/publish")
-def publish():
-    # Dummy data - pick up from request for real data
-    def notify():
-        msg = str(datetime.time())
-        for sub in subscriptions:
-            sub.put(msg)
-    gevent.spawn(notify)
-    return "OK"
-
-
 @app.route("/subscribe")
 def subscribe():
+    """
+    function for returning events to the clients using server sent events
+    :return:
+    """
     def gen():
         q = Queue()
         subscriptions.append(q)
@@ -73,19 +72,21 @@ def subscribe():
 # TODO decide whether to use polyfill for browsers with SSE (IE and Edge) options are:
 # https://github.com/remy/polyfills/blob/master/EventSource.js
 # https://github.com/rwaldron/jquery.eventsource
-@app.route('/')
-def page():
-    return render_template("index.html")
-
-
-@app.route('/latest.json')
-def latest():
+@app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
+@app.route('/index/', methods=['GET'])
+@app.route('/index/<int:page>', methods=['GET'])
+def index(page=1):
     """
-    For legacy programs
-    Creates the latest.json file
+    Sets up pagination and gets data for the logger.
+    :param page: Starting page
     :return:
     """
-    return tracks_to_json(Track.query.order_by(Track.created_at).first())
+    tracks = Track.query.order_by(desc(Track.created_at)).paginate(page, app.config["ITEMS_PER_PAGE"], False)
+    # Formatting time for display
+    for track in tracks.items:
+        track.created_at = track.created_at.strftime("%x %I:%M %p")
+    return render_template('index.html', tracks=tracks)
 
 
 @app.route('/details', methods=['GET'])
@@ -97,11 +98,31 @@ def details(page=1):
     :param page:
     :return: Starting page
     """
-    tracks = models.Track.query.order_by(desc(Track.created_at)).paginate(page, itemsPerPage, False)
+    tracks = Track.query.order_by(desc(Track.created_at)).paginate(page, app.config["ITEMS_PER_PAGE"], False)
     # Formatting time for display
     for track in tracks.items:
         track.created_at = track.created_at.strftime("%x %I:%M %p")
     return render_template('index.html', tracks=tracks, detailed=True)
+
+
+# TODO have pagination use ajax instead of reloading the entire page every time
+@app.route('/page', methods=['GET'])
+@app.route('/page/', methods=['GET'])
+@app.route('/page/<int:page>', methods=['GET'])
+def get_page(page=1):
+    tracks = Track.query.order_by(desc(Track.created_at)).paginate(page, app.config["ITEMS_PER_PAGE"], False)
+    # Formatting time for display
+    return dumps([track.to_json() for track in tracks.items])
+
+
+@app.route('/latest.json')
+def latest():
+    """
+    For legacy programs
+    Creates the latest.json file
+    :return:
+    """
+    return Track.query.order_by(Track.created_at).first().to_json()
 
 
 # TODO Refactor for SSE pushing
@@ -112,7 +133,6 @@ def add_track(track):
                      a_track['time'], a_track['request'], a_track['requester'])
     db.session.add(db_track)
     db.session.commit()
-    emit('addTracks', track, json=True, broadcast=True)
 
 
 # TODO refactor for SSE pushing
@@ -133,7 +153,9 @@ def remove_track(track_id):
     db.session.commit()
 
 
-# TODO refactor for SSE pushing
+
+
+# TODO refactor for SSE pushing and finish in general
 @app.route('/search')
 def search_track(start=None, end=None, title=None, artist=None):
     results = Track.query
@@ -145,6 +167,7 @@ def search_track(start=None, end=None, title=None, artist=None):
         results = results.filter(Track.artist.like(artist))
     if title is not None:
         results = results.filter(Track.title.like(artist))
+    return dumps({'action': "search", 'data': [track.to_json for track in results.all()]})
 
 
 # watch over the database and push updates when rvdl or another source updates and it does not go through the server.
@@ -168,29 +191,6 @@ def db_overwatch():
         old_tracks = new_tracks + [track for track in old_tracks if track.created_at >= time]
         sleep(3)
     return db_overwatch()
-
-
-def tracks_to_json(query):
-    """
-    Function for converting tracks to json and prettifying the
-    json while debugging, switch to compact for deployment
-    :param query:
-    :return:
-    """
-    obj = []
-    if isinstance(query, list):
-        for track in query:
-            obj.append({'id': track.id, 'artist': track.artist, 'title': track.title,
-                        'time': track.created_at.strftime("%x %I:%M %p"), 'requester': track.requester,
-                        'group': track.group.name})
-    else:
-        obj.append({'id': query.id, 'artist': query.artist, 'title': query.title,
-                    'time': query.created_at.strftime("%x %I:%M %p"), 'requester': query.requester,
-                    'group': query.group.name})
-    if app.testing:
-        return dumps(obj, sort_keys=True, indent=4)
-    else:
-        return dumps(obj, separators=(',', ':'))
 
 
 if __name__ == '__main__':
