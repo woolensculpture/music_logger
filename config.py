@@ -32,7 +32,7 @@ class Staging(Config):
 class Development(Config):
     TESTING = True
     DEBUG = True
-    DB_USER = 'root'
+    DB_USER = 'logger'
     DB_HOST = 'localhost'
     DB_NAME = 'music_logger'
     DB_PASSWORD = 'Ax^2+Bx+C=y'

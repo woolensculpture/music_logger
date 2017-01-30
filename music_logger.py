@@ -17,6 +17,7 @@ db.init_app(app)
 
 subscriptions = []
 
+# Note: While developing many changes to this file required the project to be reloaded to take effect
 
 # code originally from http://flask.pocoo.org/snippets/116/
 class ServerSentEvent(object):
@@ -77,16 +78,30 @@ def page():
     return render_template("index.html")
 
 
-# for legacy programs
 @app.route('/latest.json')
 def latest():
+    """
+    For legacy programs
+    Creates the latest.json file
+    :return:
+    """
     return tracks_to_json(Track.query.order_by(Track.created_at).first())
 
 
-# TODO decide whether to use polyfill for browsers with SSE (IE and Edge)
-@app.route('/Details')
-def details():
-    return render_template("index.html", detailed=True)
+@app.route('/details', methods=['GET'])
+@app.route('/details/', methods=['GET'])
+@app.route('/details/<int:page>', methods=['GET'])
+def details(page=1):
+    """
+    Shows the in-station extra information
+    :param page:
+    :return: Starting page
+    """
+    tracks = models.Track.query.order_by(desc(Track.created_at)).paginate(page, itemsPerPage, False)
+    # Formatting time for display
+    for track in tracks.items:
+        track.created_at = track.created_at.strftime("%x %I:%M %p")
+    return render_template('index.html', tracks=tracks, detailed=True)
 
 
 # TODO Refactor for SSE pushing
@@ -97,6 +112,7 @@ def add_track(track):
                      a_track['time'], a_track['request'], a_track['requester'])
     db.session.add(db_track)
     db.session.commit()
+    emit('addTracks', track, json=True, broadcast=True)
 
 
 # TODO refactor for SSE pushing
@@ -155,8 +171,12 @@ def db_overwatch():
 
 
 def tracks_to_json(query):
-    """function for converting tracks to json and prettifying the
-    json while debugging, switch to compact for deployment"""
+    """
+    Function for converting tracks to json and prettifying the
+    json while debugging, switch to compact for deployment
+    :param query:
+    :return:
+    """
     obj = []
     if isinstance(query, list):
         for track in query:

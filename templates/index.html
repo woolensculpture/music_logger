@@ -4,67 +4,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WITR 89.7 almost endless music logger</title>
-    <!-- replace links with either nginx serving them or pulling from internet source -->
-    <link rel="foundation-css" type="text/css"
-          href="{{ url_for('static', filename='foundation/css/foundation.min.css') }}"/>
-    <link rel="logger-css" type="text/css" href=http://127.0.0.1"{{ url_for('static', filename='logger/main.css') }}"/>
-    <script rel="foundation-js" src="{{ url_for('static', filename='foundation/js/vendor/jquery.js') }}"></script>
-
-    <script rel="foundation-js" src="{{ url_for('static', filename='foundation/js/vendor/what-input.js') }}"></script>
-    <script rel="foundation-js"
-            src="{{ url_for('static', filename='foundation/js/vendor/foundation.min.js') }}"></script>
+    {#Replace links with either nginx serving them or pulling from internet source#}
+    <link rel="icon" type="image/ico" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='logger/main.css') }}"/>
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='foundation/css/foundation.min.css') }}">
+    <script src="{{ url_for('static', filename='foundation/js/vendor/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='logger/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='foundation/js/vendor/what-input.js') }}"></script>
+    <script src="{{ url_for('static', filename='foundation/js/vendor/foundation.min.js') }}"></script>
     {% if detailed == true %}
         <script>var detailed = true</script>
     {% else %}
         <script>var detailed = false</script>
     {% endif %}
-    <!--    <script rel="foundation-js" src="{{ url_for('static', filename='logger/controls.js') }}"></script> -->
-    <script rel="logger-js" src="{{ url_for('static', filename='logger/main.js') }}"></script>
-
+    {#Controls and Main JS files must load after "detailed" variable is assigned#}
+    <script src="{{ url_for('static', filename='logger/controls.js') }}"></script>
+    <script src="{{ url_for('static', filename='logger/main.js') }}"></script>
 </head>
 <body>
-<script> $(document).foundation(); </script>
 <div class="grid-frame vertical">
     <div id="title" class="row">
-        <div class="large-3 columns"><a href="https://witr.rit.edu"><h1>WITR 89.7</h1></a></div>
-        <div class="large-9 columns"><h2 class="text-right">(Near) Endless Song Logger</h2></div>
+        <div class="small-3 column"><a href="https://witr.rit.edu"><h1>WITR 89.7</h1></a></div>
+        <div class="small-9 column"><h2 class="text-right">(Near) Endless Song Logger</h2></div>
     </div>
-<div class="row">
-    <div class="input-group">
-        <input id='artistInput' class="input-group-field" type="text" placeholder="Artist">
-        <input id='titleInput' class="input-group-field" type="text" placeholder="Title">
-        <input id="Search" class="button" type="submit" value="Search">
-    </div>
-</div>
     <div class="row">
-        <div class="large-11 column float-center">
+        <div class="small-2 small-offset-4 column">
+            <input id='artistInput' class="input-group-field" type="text" placeholder="Artist">
+        </div>
+        <div class="small-2 column">
+            <input id='titleInput' class="input-group-field" type="text" placeholder="Title">
+        </div>
+        <div class="small-2 column">
+            <input id='dateTimeInput' class="input-group-field" type="text" placeholder="Select Date/Time">
+        </div>
+        <div class="small-2 column">
+            <input id="Search" class="expanded button" type="submit" value="Search">
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-12 column">
             <table>
-                <thead id="column_headers">
+                <thead>
                 <tr>
-                    <th><h4>Artist</h4></th>
-                    <th><h4>Title</h4></th>
-                    <th><h4>Play Time</h4></th>
+                    <th>Artist</th>
+                    <th>Title</th>
+                    <th>Play Time</th>
                     {% if detailed == true %}
-                        <th><h4>rvdl</h4></th>
-                        <th><h4>group</h4></th>
-                        <th><h4>Requester</h4></th>
-    {% endif %}
+                        <th>Group</th>
+                        <th>Requester</th>
+                        <th colspan="3"></th>
+                    {% endif %}
                 </tr>
                 </thead>
+                <tbody id="logger_body">
+                {% for track in tracks.items %}
+                    <tr id={{ track.id }}
+                                {% if track.group.name == 'Feature' and detailed == true %}
+                                    class = 'table-feature'
+                                {% elif track.group.name == 'New Bin' and detailed == true %}
+                                    class = 'table-newbin'
+                                {% else %}
+                                    class = 'table-library'
+                                {% endif %}
+                    >
+                    <td>{{ track.artist }}</td>
+                    <td>{{ track.title }}</td>
+                    <td>{{ track.created_at }}</td>
+                    {% if detailed == true %}
+                        <td> {{ track.group.name }}</td>
+                        <td>
+                            {% if track.requester != None %}
+                                {{ track.requester }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if track.rivendell %}
+                                <button class='small radius rvdl button'>RVDL</button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class='small radius default button'>Edit</a>
+                        </td>
+                        <td>
+                            <a class='small radius alert button'>Delete</a>
+                        </td>
+                    {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
             </table>
-</div>
+        </div>
     </div>
-<!-- the tracks -->
-    <div class="row align-center">
-        <ul class="pagination" role="navigation" aria-label="Pagination">
-            <li class="pagination-previous disabled">Previous <span class="show-for-sr">page</span></li>
-            <li class="current"><span class="show-for-sr">You're on page</span> 1</li>
-            <li><a href="#" aria-label="Page 2">2</a></li>
-            <li class="ellipsis" aria-hidden="true"></li>
-            <li class="pagination-next"><a href="#" aria-label="Next page">Next <span
-                    class="show-for-sr">page</span></a></li>
-        </ul>
+
+    <div class="row">
+        <div class="small-12 column">
+            <ul class="pagination" role="navigation" aria-label="Pagination">
+                {% if tracks.has_prev %}
+                    <li class="pagination-previous">
+                        {% if detailed == true %}
+                            <a href="{{ url_for("details", page=tracks.prev_num) }}"> Previous <span
+                                    class="show-for-sr">page</span></a>
+                        {% else %}
+                            <a href="{{ url_for("index", page=tracks.prev_num) }}"> Previous <span
+                                    class="show-for-sr">page</span></a>
+                        {% endif %}
+                    </li>
+                {% else %}
+                    <li class="pagination-previous disabled">Previous <span class="show-for-sr">page</span></li>
+                {% endif %}
+
+                {# Customize the amount of page numbers show with iter_pages parameters #}
+                {% for page in tracks.iter_pages() %}
+                    {% if page %}
+                        {% if page != tracks.page %}
+                            <li>
+                                {% if detailed == true %}
+                                    <a href="{{ url_for("details", page=page) }}"
+                                       aria-label="Page {{ page }}">{{ page }}</a>
+                                {% else %}
+                                    <a href="{{ url_for("index", page=page) }}"
+                                       aria-label="Page {{ page }}">{{ page }}</a>
+                                {% endif %}
+                            </li>
+                        {% else %}
+                            <li class="current"><span class="show-for-sr">You're on page</span> {{ page }}</li>
+                        {% endif %}
+                    {% else %}
+                        <li class="ellipsis" aria-hidden="true"></li>
+                    {% endif %}
+                {%- endfor %}
+                {% if tracks.has_next %}
+                    <li class="pagination-next">
+                        {% if detailed == true %}
+                            <a href="{{ url_for("details", page=tracks.next_num) }}" aria-label="Next page">Next <span
+                                    class="show-for-sr">page</span></a>
+                        {% else %}
+                            <a href="{{ url_for("index", page=tracks.next_num) }}" aria-label="Next page">Next <span
+                                    class="show-for-sr">page</span></a>
+                        {% endif %}
+                    </li>
+                {% else %}
+                    <li class="pagination-next disabled">Previous <span class="show-for-sr">page</span></li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 </div>
+<script>$(document).foundation();</script>
 </body>
 </html>

@@ -1,10 +1,11 @@
 --
 -- Dumping data for table `tracks`
 --
-
+SET unique_checks = 0;
+SET foreign_key_checks = 0;
 LOCK TABLES `tracks` WRITE;
-/*!40000 ALTER TABLE `tracks`
-  DISABLE KEYS */;
+# /*!40000 ALTER TABLE `tracks`
+#   DISABLE KEYS */;
 INSERT INTO `tracks` VALUES
   (497416, 'Telegram', 'Inside/Outside', NULL, 1, 2, '2016-04-07 08:23:57', '2016-04-07 08:23:57', NULL, NULL, 121819),
   (497417, 'Junip', 'Your Life Your Call', NULL, 1, 3, '2016-04-07 08:26:58', '2016-04-07 08:26:58', NULL, NULL, 121821),
@@ -12615,6 +12616,8 @@ INSERT INTO `tracks` VALUES
   (510090, 'Feels', 'Today', NULL, 1, 2, '2016-05-11 16:58:01', '2016-05-11 16:58:01', NULL, NULL, 147474),
   (510091, 'The Presidents of the United States of America', 'Peaches', NULL, 1, 3, '2016-05-11 17:02:11',
            '2016-05-11 17:02:11', NULL, NULL, 147476);
-/*!40000 ALTER TABLE `tracks`
-  ENABLE KEYS */;
+# /*!40000 ALTER TABLE `tracks`
+#   ENABLE KEYS */;
+SET foreign_key_checks = 1;
+SET unique_checks = 1;
 UNLOCK TABLES;

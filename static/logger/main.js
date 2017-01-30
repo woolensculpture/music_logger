@@ -10,7 +10,32 @@
     console.log(e.data);
     eventOutputContainer.innerHTML = e.data;
     };
+    socket.on('addTracks', function (Tracks) {
+        JSON.parse(Tracks).forEach(addTrack);
+    });
 
+    socket.on('updateTrack', function (id, time, title, artist, group, rivendell, requester) {
+        var row = $("tr#" + id.toString()).fadeOut();
+        row.propertyIsEnumerable();
+    });
+
+    socket.on('removeTrack', function (id) {
+        $("#" + id.toString()).fadeOut().remove();
+    });
+
+    /* pagination: store date range client side and query */
+    function nextRange() {
+        socket.send();
+        $("tr").fadeOut("fast").remove();
+    }
+
+    $("#Search").click(function () {
+        socket.send('search', {'title': title, 'artist': artist, 'start': start.toString(), 'end': end.toString()});
+    });
+
+    /**
+     * Adds tracks into the logger_body ID element - the body tag of the main table
+     */
     function addTrackToTop(track) {
         console.log(track);
         $("<tr id='" + track.id + "' >" +
