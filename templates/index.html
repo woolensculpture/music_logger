@@ -27,7 +27,7 @@
     <div class="row">
         {% if control %}
             <div class ="small-2 column">
-            <input id="Search" class="success expanded button" type="submit" action="createTrack()" value="Search">
+            <input id="Search" class="success expanded button" type="submit" value="Search">
             </div>
         {% endif %}
         <div class="small-2 small-offset-4 column">
@@ -55,7 +55,7 @@
 		                </tr>
 	                </tbody>
             </table>
-            <div class="alert alert-box"  style="display:none;" id="alert"><strong>Oh snap!</strong></div>
+            <div class="alert alert-box"  style="display:none;" id="alert"><strong>start date greater than end date</strong></div>
         </div>
         <script>
             //TODO make into its own file
@@ -64,7 +64,7 @@
                 var startDate = new Date(2012, 1, 20);
                 var endDate = new Date(2012, 1, 25);
                 var startSelector = $('#startSelector');
-                startSelector.fdatepicker({})
+                startSelector.fdatepicker({format: 'mm-dd-yyyy hh:ii', pickTime: true})
                     .on('changeDate', function (ev) {
                     if (ev.date.valueOf() > endDate.valueOf()) {
                         $('#alert').show().find('strong').text('The start date can not be greater then the end date');
@@ -76,7 +76,7 @@
                     startSelector.fdatepicker('hide');
                 });
                 var endSelector = $('#endSelector');
-                endSelector.fdatepicker()
+                endSelector.fdatepicker({format: 'mm-dd-yyyy hh:ii', pickTime: true})
                     .on('changeDate', function (ev) {
                     if (ev.date.valueOf() < startDate.valueOf()) {
                         $('#alert').show().find('strong').text('The end date can not be less then the start date');
@@ -90,7 +90,8 @@
             });
         </script>
         <div class="small-2 column">
-            <input id="Search" class="expanded button" type="submit" action="search()" value="Search">
+            <button id="Search" class="expanded button">Search</button>
+            <script>$('#Search').click(search())</script>
         </div>
     </div>
     <div class="row">
